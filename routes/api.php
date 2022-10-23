@@ -18,10 +18,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/tip', function (Request $request) {
-    return response()->json($request->all());
-});
-
 Route::get('/stores', function () {
     return response()->json(
         [

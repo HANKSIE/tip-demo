@@ -1,5 +1,5 @@
 <template>
-    <div class="modal-content">
+    <div>
         <div class="modal-header">
             <h5 class="modal-title">打賞彈窗</h5>
             <button
@@ -10,13 +10,14 @@
             ></button>
         </div>
         <div class="modal-body">
-            <form id="form" method="post" :action="action">
+            <form id="form" method="post" action="tip">
+                <input type="hidden" name="_token" :value="csrfToken" />
                 <div class="form-group">
                     <select
                         name="store_id"
                         required
                         v-model="selected.storeId"
-                        @change="loadStoreOptions(selected.storeId)"
+                        @change="loadOptions(selected.storeId)"
                     >
                         <option disabled value="">店家名稱</option>
                         <option
@@ -27,7 +28,11 @@
                             {{ store.name }}
                         </option>
                     </select>
-                    <select name="employee_id" v-model="selected.employeeId">
+                    <select
+                        name="employee_id"
+                        v-model="selected.employeeId"
+                        :disabled="!hasSelectStore"
+                    >
                         <option disabled value="">員工名稱</option>
                         <option
                             v-for="employee in options.employees"
@@ -59,10 +64,15 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <select name="pay" required v-model="selected.pay">
+                    <select name="payment" required v-model="selected.payment">
                         <option disabled value="">支付方式</option>
-                        <option value="1">信用卡</option>
-                        <option value="2">Line Pay</option>
+                        <option
+                            v-for="{ value, name } in options.payments"
+                            :value="value"
+                            :key="value"
+                        >
+                            {{ name }}
+                        </option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -109,18 +119,17 @@
     </div>
 </template>
 <script>
-import { apiUrl } from "../constant";
-
 const createInitSelected = () => ({
     storeId: "",
     employeeId: "",
-    pay: "",
+    payment: "",
     amount: 0,
     score: 0,
     comment: "",
 });
 
 export default {
+    props: ["storeId", "employeeId"],
     data() {
         return {
             options: {
@@ -128,29 +137,43 @@ export default {
                 employees: [],
                 amounts: [],
                 comments: [],
+                payments: [
+                    { value: 1, name: "信用卡" },
+                    { value: 2, name: "PayPay" },
+                    { value: 3, name: "Line Pay" },
+                ],
             },
             selected: createInitSelected(),
-            action: `${apiUrl}/tip`,
+            csrfToken: document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute("content"),
         };
     },
     methods: {
-        // submit(e) {
-        //     const formData = new FormData(e.target);
-        //     for (const pair of formData.entries()) {
-        //         console.log(`${pair[0]}, ${pair[1]}`);
-        //     }
-        //     http.post("tip", formData);
-        // },
-        async loadStoreOptions(id) {
-            this.clear(id);
-            const res = await http.get(`store/${id}/options`);
+        async loadStores() {
+            const res = await http.get("stores");
+            this.options.stores = res.data.stores;
+        },
+        async loadOptions(storeId) {
+            this.clear(storeId);
+            const res = await http.get(`store/${storeId}/options`);
             this.options.employees = res.data.employees;
             this.options.amounts = res.data.amounts;
             this.options.comments = res.data.comments;
         },
-        clear(id) {
+        async loadStoreAndOptions(storeId) {
+            const [storeRes, optionRes] = await Promise.all([
+                http.get("stores"),
+                http.get(`store/${storeId}/options`),
+            ]);
+            this.options.stores = storeRes.data.stores;
+            this.options.employees = optionRes.data.employees;
+            this.options.amounts = optionRes.data.amounts;
+            this.options.comments = optionRes.data.comments;
+        },
+        clear(storeId) {
             this.selected = createInitSelected();
-            this.selected.storeId = id; // 保留現在選擇的store id
+            this.selected.storeId = storeId; // 保留現在選擇的store id
         },
         useDefaultComment(text) {
             this.selected.comment = text;
@@ -159,11 +182,16 @@ export default {
             this.selected.amount = amount;
         },
     },
-    async created() {
-        const res = await http.get("stores");
-        this.options.stores = res.data.stores;
+    created() {
+        this.selected.storeId = this.storeId ?? this.selected.storeId;
+        this.selected.employeeId = this.employeeId ?? this.selected.employeeId;
+        if (this.hasSelectStore) this.loadStoreAndOptions(this.storeId);
+        else this.loadStores();
+    },
+    computed: {
+        hasSelectStore() {
+            return this.selected.storeId != "";
+        },
     },
 };
 </script>
-
-<style></style>

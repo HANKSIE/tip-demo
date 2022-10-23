@@ -8,10 +8,8 @@ window._ = require("lodash");
 
 window.axios = require("axios");
 
-const { apiUrl } = require("./constant");
-
 const http = axios.create({
-    baseURL: apiUrl,
+    baseURL: "api",
     timeout: 10000,
     withCredentials: true,
 });

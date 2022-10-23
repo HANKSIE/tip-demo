@@ -12,7 +12,7 @@ const mix = require("laravel-mix");
  */
 
 mix.js("resources/js/app.js", "public/js")
-    .js("resources/js/tip-alert.js", "public/js")
+    .js("resources/js/tip-form.js", "public/js")
     .sass("resources/scss/app.scss", "public/css")
     .vue()
     .version();

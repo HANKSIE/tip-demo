@@ -8307,10 +8307,8 @@ window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
  */
 
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-var _require = __webpack_require__(/*! ./constant */ "./resources/js/constant.js"),
-  apiUrl = _require.apiUrl;
 var http = axios__WEBPACK_IMPORTED_MODULE_0___default().create({
-  baseURL: apiUrl,
+  baseURL: "api",
   timeout: 10000,
   withCredentials: true
 });
@@ -8337,22 +8335,6 @@ window.http = http;
 
 window.Alpine = alpinejs__WEBPACK_IMPORTED_MODULE_2__["default"];
 alpinejs__WEBPACK_IMPORTED_MODULE_2__["default"].start();
-
-/***/ }),
-
-/***/ "./resources/js/constant.js":
-/*!**********************************!*\
-  !*** ./resources/js/constant.js ***!
-  \**********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "apiUrl": () => (/* binding */ apiUrl)
-/* harmony export */ });
-/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
-var apiUrl = "".concat(process.env.APP_URL, "/api").replace("undefined", "");
 
 /***/ }),
 
